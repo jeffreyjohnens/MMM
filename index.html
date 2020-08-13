@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  <link rel="stylesheet" href="https://unpkg.com/material-components-web@7.0.0/dist/material-components-web.min.css">
+  <script src="https://unpkg.com/material-components-web@7.0.0/dist/material-components-web.min.js"></script>
+
+  <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;400&display=swap" rel="stylesheet">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <style>
+    .id-placeholder {
+      font-kerning: normal;
+    }
+
+    .main-button-outer {
+      float: left;
+      height: 65px;
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+
+    .main-button-inner {
+      padding-top: 15px;
+    }
+
+    .playback-button-inner {
+      padding-top: 8px;
+    }
+
+    .label {
+      line-height: 30px;
+      font-size: 12px;
+      font-family: 'Roboto', sans-serif;
+    }
+    .label-div {
+      padding-left: 10px; 
+      padding-right: 10px; 
+      float:left; 
+      text-align: center; 
+    }
+
+    .small {
+      min-height: 20px;
+      height: 20px;
+    }
+
+    .small-select {
+      min-width: 120px;
+      margin-bottom: -12px;
+    }
+    .small-menu {
+      margin-top: -16px;
+    }
+    .small-font {
+      line-height: 12px;
+      font-size: 12px;
+      height: 20px;
+    }
+    .push-down {
+      margin-top: 12px;
+    }
+
+  </style>
+
+  <script>
+
+    var RAW = null;
+
+    function fmod(x,n) {
+      return ((x%n)+n)%n;
+    };
+
+    function any(iterable) {
+      for (var index = 0; index < iterable.length; index++) {
+        if (iterable[index]) return true;
+      }
+      return false;
+    }
+    function all(iterable) {
+      for (var index = 0; index < iterable.length; index++) {
+        if (!iterable[index]) return false;
+      }
+      return true;
+    }
+
+    function build_tooltip(tooltip_text, id, parent, right=false) {
+      var tool = document.createElement("DIV");
+      tool.setAttribute("data-mdl-for", id);
+      if (right) {
+        tool.className = "mdl-tooltip mdl-tooltip--right";
+      }
+      else {
+        tool.className = "mdl-tooltip";
+      }
+      tool.textContent = tooltip_text;
+      parent.appendChild(tool);
+    }
+
+    var REV_INST_MAP = {0: 'piano', 1: 'piano', 2: 'piano', 3: 'piano', 4: 'piano', 5: 'piano', 6: 'piano', 7: 'piano', 9: 'chromatic_perc', 10: 'chromatic_perc', 11: 'chromatic_perc', 12: 'chromatic_perc', 13: 'chromatic_perc', 14: 'chromatic_perc', 15: 'chromatic_perc', 16: 'organ', 17: 'organ', 18: 'organ', 19: 'organ', 20: 'organ', 21: 'organ', 22: 'organ', 23: 'organ', 24: 'guitar', 25: 'guitar', 26: 'guitar', 27: 'guitar', 28: 'guitar', 29: 'guitar', 30: 'guitar', 31: 'guitar', 32: 'bass', 33: 'bass', 34: 'bass', 35: 'bass', 36: 'bass', 37: 'bass', 38: 'bass', 39: 'bass', 40: 'strings', 41: 'strings', 42: 'strings', 43: 'strings', 44: 'strings', 45: 'strings', 46: 'strings', 47: 'strings', 48: 'ensemble', 49: 'ensemble', 50: 'ensemble', 51: 'ensemble', 52: 'ensemble', 53: 'ensemble', 54: 'ensemble', 55: 'ensemble', 56: 'brass', 57: 'brass', 58: 'brass', 59: 'brass', 60: 'brass', 61: 'brass', 62: 'brass', 63: 'brass', 64: 'reed', 65: 'reed', 66: 'reed', 67: 'reed', 68: 'reed', 69: 'reed', 70: 'reed', 71: 'reed', 72: 'pipe', 73: 'pipe', 74: 'pipe', 75: 'pipe', 76: 'pipe', 77: 'pipe', 78: 'pipe', 79: 'pipe', 80: 'synth_lead', 81: 'synth_lead', 82: 'synth_lead', 83: 'synth_lead', 84: 'synth_lead', 85: 'synth_lead', 86: 'synth_lead', 87: 'synth_lead', 88: 'synth_pad', 89: 'synth_pad', 90: 'synth_pad', 91: 'synth_pad', 92: 'synth_pad', 93: 'synth_pad', 94: 'synth_pad', 95: 'synth_pad', 96: 'synth_effects', 97: 'synth_effects', 98: 'synth_effects', 99: 'synth_effects', 100: 'synth_effects', 101: 'synth_effects', 102: 'synth_effects', 103: 'synth_effects', 104: 'ethnic', 105: 'ethnic', 106: 'ethnic', 107: 'ethnic', 108: 'ethnic', 109: 'ethnic', 110: 'ethnic', 111: 'ethnic', 112: 'percussive', 113: 'percussive', 114: 'percussive', 115: 'percussive', 116: 'percussive', 117: 'percussive', 118: 'percussive', 119: 'percussive', 120: 'sound_fx', 121: 'sound_fx', 122: 'sound_fx', 123: 'sound_fx', 124: 'sound_fx', 125: 'sound_fx', 126: 'sound_fx', 127: 'sound_fx', 128: 'drums'};
+
+    // ===================================
+  
+    function get_notes(midi_json, track_num) {
+      // we can assume that the midi_json is well formed here
+      var notes = [];
+      var onsets = {};
+      var track = midi_json["tracks"][track_num];
+      if ("bars" in track) {
+        var bars = track["bars"];
+        for (i=0; i<bars.length; i++) {
+          if ("events" in bars[i]) {
+            var events = bars[i]["events"];
+            for (j=0; j<events.length; j++) {
+              var event = midi_json["events"][events[j]];
+              if (event["velocity"] > 0) {
+                onsets[event["pitch"]] = event;
+              }
+              else if(event["pitch"] in onsets) {
+                notes.push({
+                  "start" : onsets[event["pitch"]]["time"],
+                  "end" : event["time"],
+                  "pitch" : event["pitch"],
+                });
+                delete onsets[event["pitch"]];
+              }
+            }
+          }
+        }
+      }
+      return notes;
+    }
+    
+    function build_svg_rect(x, y, width, height, fill="none", stroke="none", stroke_width=0) {
+      var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      r.style.x = x.toString() + "%";
+      r.style.y = y.toString() + "%";
+      r.style.width = width.toString() + "%";
+      r.style.height = height.toString() + "%";
+      r.style.fill = fill;
+      r.style.stroke = stroke;
+      r.style.strokeWidth = stroke_width;
+      return r;
+    }
+    
+    function build_pianoroll(notes, track_num, highlight_bars=[], nbars=4) {
+      
+      var resolution = 12;
+      var max_notes = 128;
+      var xticks = resolution * 4 * nbars;
+      var beat_width = 100. / (8 * nbars); // eighth note width
+      var beat_color = "#9E9E9E";
+      
+      var bar_width = 100. / nbars; // bar width
+      var bar_colors = ["#A9A9A9", "#B4B4B4"];
+      var small = 1. / xticks / 4; // quarter of a tick width
+    
+      var x = document.createElement("DIV");
+      var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    
+      s.style.width = "100%";
+      s.style.height = "75px";
+      s.viewBox = "0 0 100 100";
+      s.preserveAspectRatio = "none";
+    
+      // make the bars
+      for (i=0; i<nbars; i++) {
+        s.appendChild(build_svg_rect(i*bar_width, 0, bar_width, 100, bar_colors[i%2]));
+      }
+    
+      // make the beats
+      for (i=0; i<(8*nbars); i++) {
+        s.appendChild(build_svg_rect(i*beat_width, 0, beat_width, 100, "none", beat_color, .15));
+      }
+    
+      // draw the notes
+      for (i=0; i<notes.length; i++) {
+        note = notes[i];
+        var y = 100 - (note["pitch"] / max_notes * 100);
+        var x = note["start"] / xticks  * 100;
+        var w = (((note["end"] - note["start"]) / xticks) - small) * 100;
+        var h = 1. / max_notes * 100;
+        s.appendChild(build_svg_rect(x,y,w,h,"red"));
+      }
+
+      // make the bar highlights
+      for (i=0; i<highlight_bars.length; i++) {
+        var b = build_svg_rect(
+          highlight_bars[i]*bar_width, 0, bar_width, 100, "blue");
+        b.style.opacity = .3;
+        s.appendChild(b);
+      }
+    
+      return s;
+    }
+
+    function add_track(notes, TRACK_COUNT, highlight_bars=[], inst="any", density=5, resample=true) {
+      track_id = TRACK_COUNT.toString();
+      var temp = document.getElementsByTagName("template")[0];
+      var track = temp.content.cloneNode(true);
+
+      // add the piano roll
+      roll = track.getElementById("roll_")
+      roll.appendChild(build_pianoroll(notes, TRACK_COUNT, highlight_bars));
+
+      // change the ids to include track_id
+      var nodes = track.querySelectorAll(".id-placeholder");
+      for (var i=0; i<nodes.length; i++) {
+        nodes[i].id = nodes[i].id + track_id;
+      }
+
+      return track;
+    }
+
+    function build_midi(midi_json, bhs) {
+      var example = document.createElement("DIV");
+      for (var track_num=0; track_num<midi_json["tracks"].length; track_num++) {
+        var inst = REV_INST_MAP[midi_json["tracks"][track_num]["instrument"]];
+        if (midi_json["tracks"][track_num]["isDrum"]) {
+          inst = "drums";
+        }
+        var density = midi_json["tracks"][track_num]["noteDensityV2"];
+        var notes = get_notes(midi_json, track_num);
+        var track = add_track(notes, track_num, bhs[track_num], inst, density, false);
+        example.appendChild(track);
+      }
+      return example;
+    }
+
+    var createNextHandler = function(cindex, index) {
+      return function() {
+        set_example(cindex, index);
+      };
+    }
+
+    function set_example(cindex, index) {
+      // set caption and audio and ID
+      $("#caption_" + cindex.toString()).text( RAW[cindex]["examples"][index]["caption"] );
+      $("#audio_" + cindex.toString()).attr("src", RAW[cindex]["examples"][index]["audio"]);
+      $("#sample_id_" + cindex.toString()).text( RAW[cindex]["examples"][index]["sample_id"]);
+      
+      // clear the example container and re-initilize
+      $("#example_meta_container_" + cindex.toString()).empty().append('<div id="example_container_' + cindex.toString() + '" style="width:500px; float:left;"></div>');
+
+      // add the piano roll to the example container
+      var m = build_midi(RAW[cindex]["examples"][index]["json"], RAW[cindex]["examples"][index]["highlights"]);
+      $("#example_container_" + cindex.toString()).append( m );
+
+      // set the onclick function
+      var num_examples = RAW[cindex]["examples"].length;
+      $("#next_" + cindex.toString()).click( createNextHandler(cindex, fmod(index+1,num_examples)) );
+      $("#prev_" + cindex.toString()).click( createNextHandler(cindex, fmod(index-1,num_examples)) );
+      
+      // set the height of the left / right button containers
+      var h = $("#example_container_" + cindex.toString()).height();
+      $("#next_container_" + cindex.toString()).height(h);
+      $("#prev_container_" + cindex.toString()).height(h);
+    }
+
+    function build_example_brower(parent, index) {
+      var temp = document.getElementsByTagName("template")[1];
+      var x = temp.content.cloneNode(true);
+      var nodes = x.querySelectorAll(".id-placeholder");
+      for (var i=0; i<nodes.length; i++) {
+        nodes[i].id = nodes[i].id + index.toString();
+      }
+      parent.appendChild(x);
+      document.getElementById("title_" + index.toString()).textContent = RAW[index]["title"];
+      $("#description_" + index.toString()).text( RAW[index]["description"] );
+      set_example(index,0);
+    }
+
+    // start up script
+    document.addEventListener('DOMContentLoaded', function(event) {
+
+      $.getJSON('http://www.sfu.ca/~jeffe/examples/total.json', function(data) {
+        RAW = data;
+        var parent = document.getElementById("examples");
+        for (var i=0; i<RAW.length; i++) {
+          build_example_brower(parent, i);
+        }
+      });
+
+    });
+
+  </script>
+  
+  <body>
+
+  <template>
+    <div style="width:500px; height:75px; margin-bottom:10px;" class="mdc-elevation--z4 id-placeholder" id="roll_"></div>
+    <div id="hiddenContainer" style="display: none;">
+      <audio id="beep" controls src=""></audio>
+    </div>
+  </template>
+
+  <template>
+    <div style="width:100%; display:flex; justify-content:center;">
+      <div style="width:650px; font-family:'Roboto', sans-serif; margin:50px;">
+        <div style="display:flex; justify-content:center;">
+          <div class="id-placeholder" id="title_" style="width:500px; margin:20px; text-align:center; font-size:24px">
+          </div>
+        </div>
+        <div style="display:flex; justify-content:center;">
+          <div class="id-placeholder" id="description_" style="width:500px; margin:20px; font-size:14px">
+          </div>
+        </div>
+        <div style="display:flex; justify-content:center;">
+          <div class="id-placeholder" id="prev_container_" style="width:70px; margin:2px; float:left; align-items:center; display:flex; justify-content:center;">
+            <button class="mdc-icon-button material-icons id-placeholder" id="prev_">keyboard_arrow_left</button>
+          </div>
+          <div class="id-placeholder" id="example_meta_container_"></div>
+          <div class="id-placeholder" id="next_container_" style="width:70px; margin:2px; float:left; align-items:center; display:flex; justify-content:center;">
+            <button class="mdc-icon-button material-icons id-placeholder" id="next_">keyboard_arrow_right</button>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:center;">
+          <div style="width:500px; margin:10px;">
+            <div class="id-placeholder" id="sample_id_" style="width:50px; float:left"></div>
+            <audio class="id-placeholder" id="audio_" style="height:20px; width:450px; float:left" controls></audio>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:center;">
+          <div class="id-placeholder" id="caption_" style="width:500px; margin:10px; text-align:center;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <div style="width:100%; display:flex; justify-content:center;">
+    <div style="width:650px; font-family:'Roboto', sans-serif; margin:50px;">
+      <div style="display:flex; justify-content:center;">
+        <div style="width:500px; margin:20px; text-align:center; font-size:24px">
+          MMM : Multi-Track Music Machine
+        </div>
+      </div>
+      <div style="display:flex; justify-content:center;">
+        <div style="width:500px; margin:20px; font-size:14px">
+          We propose MMM, a generative system based on the Transformer architecture that is capable of generating multi-track music. In contrast to previous work, which represents musical material as a single time-ordered sequence, where the musical events corresponding to different tracks are interleaved, we create a time-ordered sequence of musical events for each track and concatenate several tracks into a single sequence. This takes advantage of the attention-mechanism, which can adeptly handle long-term dependencies. We explore how various representations can offer the user a high degree of control at generation time, providing an interactive demo that accommodates track-level and bar-level inpainting, and offers control over track instrumentation and note density.
+          <br><br>
+          Read the paper, listen to some of the examples below, or try the Demo (coming soom).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="examples"></div>
+
+  </body>
+</html>
