@@ -116,10 +116,10 @@
       var track = midi_json["tracks"][track_num];
       if ("bars" in track) {
         var bars = track["bars"];
-        for (i=0; i<bars.length; i++) {
+        for (var i=0; i<bars.length; i++) {
           if ("events" in bars[i]) {
             var events = bars[i]["events"];
-            for (j=0; j<events.length; j++) {
+            for (var j=0; j<events.length; j++) {
               var event = midi_json["events"][events[j]];
               if (event["velocity"] > 0) {
                 onsets[event["pitch"]] = event;
@@ -135,6 +135,14 @@
             }
           }
         }
+      }
+      // handle remaining notes
+      for (var key in onsets) {
+        notes.push({
+          "start" : onsets[key]["time"],
+          "end" : 192,
+          "pitch" : onsets[key]["pitch"],
+        });
       }
       return notes;
     }
@@ -154,7 +162,11 @@
     function build_pianoroll(notes, track_num, highlight_bars=[], nbars=4) {
       
       var resolution = 12;
-      var max_notes = 128;
+      
+      // make this change to make things more visible
+      var min_note = 30;
+      var max_note = 100;
+      var num_notes = max_note - min_note;
       var xticks = resolution * 4 * nbars;
       var beat_width = 100. / (8 * nbars); // eighth note width
       var beat_color = "#9E9E9E";
@@ -184,18 +196,20 @@
       // draw the notes
       for (i=0; i<notes.length; i++) {
         note = notes[i];
-        var y = 100 - (note["pitch"] / max_notes * 100);
-        var x = note["start"] / xticks  * 100;
-        var w = (((note["end"] - note["start"]) / xticks) - small) * 100;
-        var h = 1. / max_notes * 100;
-        s.appendChild(build_svg_rect(x,y,w,h,"red"));
+        if ((note["pitch"] >= min_note) && (note["pitch"] < max_note)) {
+          var y = 100 - ((note["pitch"] - min_note) / num_notes * 100);
+          var x = note["start"] / xticks  * 100;
+          var w = (((note["end"] - note["start"]) / xticks) - small) * 100;
+          var h = 1. / num_notes * 100;
+          s.appendChild(build_svg_rect(x,y,w,h,"red"));
+        }
       }
 
       // make the bar highlights
       for (i=0; i<highlight_bars.length; i++) {
         var b = build_svg_rect(
           highlight_bars[i]*bar_width, 0, bar_width, 100, "blue");
-        b.style.opacity = .3;
+        b.style.opacity = .2;
         s.appendChild(b);
       }
     
