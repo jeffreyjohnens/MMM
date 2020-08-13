@@ -139,7 +139,7 @@
     }
     
     function build_svg_rect(x, y, width, height, fill="none", stroke="none", stroke_width=0) {
-      var r = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      var r = document.createElementNS("https://www.w3.org/2000/svg", "rect");
       r.style.x = x.toString() + "%";
       r.style.y = y.toString() + "%";
       r.style.width = width.toString() + "%";
@@ -163,7 +163,7 @@
       var small = 1. / xticks / 4; // quarter of a tick width
     
       var x = document.createElement("DIV");
-      var s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      var s = document.createElementNS("https://www.w3.org/2000/svg", "svg");
     
       s.style.width = "100%";
       s.style.height = "75px";
@@ -280,7 +280,7 @@
     // start up script
     document.addEventListener('DOMContentLoaded', function(event) {
 
-      $.getJSON('http://www.sfu.ca/~jeffe/examples/total.json', function(data) {
+      $.getJSON('https://www.sfu.ca/~jeffe/examples/total.json', function(data) {
         RAW = data;
         var parent = document.getElementById("examples");
         for (var i=0; i<RAW.length; i++) {
