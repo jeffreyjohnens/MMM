@@ -73,6 +73,7 @@
   <script>
 
     var RAW = null;
+    var POSITIONS = [];
 
     function fmod(x,n) {
       return ((x%n)+n)%n;
@@ -197,6 +198,8 @@
         b.style.opacity = .3;
         s.appendChild(b);
       }
+
+      console.log(s);
     
       return s;
     }
@@ -234,24 +237,28 @@
       return example;
     }
 
-    var createNextHandler = function(cindex, index) {
+    var createNext = function(cindex, n) {
       return function() {
-        set_example(cindex, index);
-      };
+        POSITIONS[cindex] = fmod(POSITIONS[cindex] + 1, n);
+        set_example(cindex, POSITIONS[cindex]); 
+      }
+    }
+
+    var createPrev = function(cindex, n) {
+      return function() {
+        POSITIONS[cindex] = fmod(POSITIONS[cindex] - 1, n);
+        set_example(cindex, POSITIONS[cindex]); 
+      }
     }
 
     function set_example(cindex, index) {
+      console.log("sezxdrfctgvy", cindex, index);
       // clear the example container and re-initilize
       $("#example_meta_container_" + cindex.toString()).empty().append('<div id="example_container_' + cindex.toString() + '" style="width:500px; float:left;"></div>');
 
       // add the piano roll to the example container
       var m = build_midi(RAW[cindex]["examples"][index]["json"], RAW[cindex]["examples"][index]["highlights"]);
       $("#example_container_" + cindex.toString()).append( m );
-
-      // set the onclick function
-      var num_examples = RAW[cindex]["examples"].length;
-      $("#next_" + cindex.toString()).click( createNextHandler(cindex, fmod(index+1,num_examples)) );
-      $("#prev_" + cindex.toString()).click( createNextHandler(cindex, fmod(index-1,num_examples)) );
       
       // set the height of the left / right button containers
       var h = $("#example_container_" + cindex.toString()).height();
@@ -275,6 +282,11 @@
       document.getElementById("title_" + index.toString()).textContent = RAW[index]["title"];
       $("#description_" + index.toString()).text( RAW[index]["description"] );
       set_example(index,0);
+      POSITIONS.push(0);
+
+      var num_examples = RAW[index]["examples"].length;
+      $("#next_" + index.toString()).click( createNext(index, num_examples) );
+      $("#prev_" + index.toString()).click( createPrev(index, num_examples) );
     }
 
     // start up script
