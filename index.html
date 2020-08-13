@@ -241,11 +241,6 @@
     }
 
     function set_example(cindex, index) {
-      // set caption and audio and ID
-      $("#caption_" + cindex.toString()).text( RAW[cindex]["examples"][index]["caption"] );
-      $("#audio_" + cindex.toString()).attr("src", RAW[cindex]["examples"][index]["audio"]);
-      $("#sample_id_" + cindex.toString()).text( RAW[cindex]["examples"][index]["sample_id"]);
-      
       // clear the example container and re-initilize
       $("#example_meta_container_" + cindex.toString()).empty().append('<div id="example_container_' + cindex.toString() + '" style="width:500px; float:left;"></div>');
 
@@ -262,6 +257,11 @@
       var h = $("#example_container_" + cindex.toString()).height();
       $("#next_container_" + cindex.toString()).height(h);
       $("#prev_container_" + cindex.toString()).height(h);
+
+      // set caption and audio and ID
+      $("#caption_" + cindex.toString()).text( RAW[cindex]["examples"][index]["caption"] );
+      $("#sample_id_" + cindex.toString()).text( RAW[cindex]["examples"][index]["sample_id"]);
+      $("#audio_" + cindex.toString()).attr("src", RAW[cindex]["examples"][index]["audio"]);
     }
 
     function build_example_brower(parent, index) {
